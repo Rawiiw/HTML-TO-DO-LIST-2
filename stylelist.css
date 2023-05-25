@@ -75,14 +75,36 @@ text-align: center;
 .addBtn:hover {
   background-color: #bbb;
 }
-piccat {
-  text-align: center;
-  left:40%;
-
-}
 p {
   font-size: 18px;
   color: #555;
 
   front-style: italic;
+}
+.filter-link {
+  cursor: pointer;
+  font-weight: normal;
+  position: relative;
+  left: 40%;
+    background: pink;
+    transition: 0.2s;
+}
+
+.filter-link.active {
+  font-weight: bold;
+  position: relative;
+  left: 40%;
+    background: white;
+    transition: 0.2s;
+}
+.clearBtn {
+  padding: 10px;
+  width: 5%;
+  background: #d9d9d9;
+  color: #555;
+  text-align: center;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 0;
+  text-align: center;
 }
