@@ -1,25 +1,142 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
- <meta charset="utf-8">
- <title>TO-DO LIST</title>
- <link rel="stylesheet" href="G:/lab/stylelist.css">
+  <meta charset="utf-8">
+  <title>TO-DO LIST</title>
+  <link rel="stylesheet" href="G:/lab/stylelist.css">
 </head>
+
 <body>
-<div id="myDIV" class="header">
-  <h2>My To Do List</h2>
-  <input type="text" id="myInput" placeholder="Title...">
-  <span onclick="newElement()" class="addBtn">Add</span>
-</div>
-<ul id="myUL">
-  <li><input type="checkbox" unchecked> Поиграть в лигу легенд</li>
-  <li> <input type="checkbox" unchecked>пойти в вки</li>
-  <li> <input type="checkbox" unchecked>организовать партию</li>
-  <li><input type="checkbox" unchecked>исповедаться</li>
-  <li><input type="checkbox" unchecked>убрать снег</li>
-  <li><input type="checkbox" unchecked>поесть</li>
-</ul>
-<a href="piccat"><img src="G:/lab/kitty.jpg"></a>
-  <br><p>kitty go....</p><br>
-<body>
-  </html>
+  <div id="head" class="header">
+    <h2 style="margin:5px">Список дел</h2>
+    <input type="text" id="myInput" placeholder="Название...">
+    <span onclick="newElement()" class="addBtn">Добавить</span>
+    <span onclick="clearLocalStorage()" class="clearBtn">Очистить</span>
+  </div>
+
+  <ul id="mylist">
+  </ul>
+
+  <div id="filterLinks">
+    <span class="filter-link" onclick="setFilter('all')" id="filter-all">Все (0)</span>
+    <span class="filter-link" onclick="setFilter('done')" id="filter-done">Сделанные (0)</span>
+    <span class="filter-link" onclick="setFilter('undone')" id="filter-undone">Не сделанные (0)</span>
+  </div>
+
+  <script>
+    // Загрузка элементов из localStorage при загрузке страницы
+    window.addEventListener('DOMContentLoaded', loadItemsFromLocalStorage);
+
+    function loadItemsFromLocalStorage() {
+      var savedItems = localStorage.getItem('todoItems');
+      if (savedItems) {
+        var items = JSON.parse(savedItems); //глобальная функция, предназначенной для анализа (парсинга) строк в формате JSON , при необходимости преобразует и возвращает значения, полученные в ходе анализа.
+        items.forEach(function (item) {
+          createListItem(item.text, item.checked);
+        });
+      }
+      updateFilterCounts();
+      attachCheckboxHandlers();
+    }
+
+    function createListItem(text, checked) {
+      var li = document.createElement('li');
+      var checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = checked;
+      checkbox.addEventListener('change', saveItemsToLocalStorage); // Добавляем обработчик события change к чекбоксу
+      li.appendChild(checkbox);
+      var textNode = document.createTextNode(text);
+      li.appendChild(textNode);
+      document.getElementById('mylist').appendChild(li);
+    }
+
+    var close = document.getElementsByClassName('close');
+    var i;
+    for (i = 0; i < close.length; i++) {
+      close[i].onclick = function () {
+        var div = this.parentElement;
+        div.style.display = 'none';
+      };
+    }
+
+    function newElement() {
+      var inputValue = document.getElementById('myInput').value;
+      if (inputValue === '') {
+        alert('Ничего не делать тоже работа');
+      } else {
+        createListItem(inputValue, false);
+        saveItemsToLocalStorage();
+      }
+      document.getElementById('myInput').value = '';
+      updateFilterCounts();
+    }
+
+    function saveItemsToLocalStorage() {
+      var listItems = document.getElementById('mylist').getElementsByTagName('li');
+      var items = [];
+      for (i = 0; i < listItems.length; i++) {
+        var item = listItems[i];
+        var text = item.textContent;
+        var checkbox = item.querySelector('input[type="checkbox"]');
+        var checked = checkbox.checked;
+        items.push({ text: text, checked: checked });
+      }
+      localStorage.setItem('todoItems', JSON.stringify(items));
+      updateFilterCounts(); // Обновляем счетчики после сохранения элементов
+    }
+
+    var filterLinks = document.getElementsByClassName('filter-link');
+    var currentFilter = 'all';
+
+    function setFilter(filter) {
+      currentFilter = filter;
+      for (i = 0; i < filterLinks.length; i++) {
+        filterLinks[i].classList.remove('active');
+      }
+      document.getElementById('filter-' + filter).classList.add('active');
+      filterList();
+    }
+
+    function filterList() {
+      var listItems = document.getElementById('mylist').getElementsByTagName('li');
+      for (i = 0; i < listItems.length; i++) {
+        var item = listItems[i];
+        item.style.display = 'block';
+        if (currentFilter === 'done' && item.querySelector('input[type="checkbox"]').checked !== true) {
+          item.style.display = 'none';
+        } else if (currentFilter === 'undone' && item.querySelector('input[type="checkbox"]').checked !== false) {
+          item.style.display = 'none';
+        }
+      }
+      updateFilterCounts();
+    }
+
+    function updateFilterCounts() {
+      var allCount = document.getElementById('mylist').getElementsByTagName('li').length;
+      var doneCount = document.getElementById('mylist').querySelectorAll('li input[type="checkbox"]:checked').length;
+      var undoneCount = allCount - doneCount;
+
+      document.getElementById('filter-all').textContent = 'Все (' + allCount + ')';
+      document.getElementById('filter-done').textContent = 'Сделанные (' + doneCount + ')';
+      document.getElementById('filter-undone').textContent = 'Не сделанные (' + undoneCount + ')';
+    }
+
+    function clearLocalStorage() {
+      localStorage.removeItem('todoItems');
+      document.getElementById('mylist').innerHTML = '';
+      updateFilterCounts();
+    }
+
+    function attachCheckboxHandlers() {
+      var checkboxes = document.querySelectorAll('#mylist input[type="checkbox"]');
+      checkboxes.forEach(function (checkbox) {
+        checkbox.addEventListener('change', saveItemsToLocalStorage);
+      });
+    }
+  </script>
+
+</body>
+
+</html>
+
